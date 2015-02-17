@@ -3,6 +3,33 @@
 #include <stdio.h>
 #include <string.h>
 
+/**********************************************************
+ÒÔÏÂÎªÄ¬ÈÏ´ÊËØ±í
+**********************************************************/
+#define LEX_CHDEFTOKEN_OFFSET	40	//×Ö·û´ÊËØÀàĞÍ¶¨ÒåÆ«ÒÆÁ¿
+const char lex_DefchTokenTab[] = {
+	'#',		//40
+	'{',		//41
+	'}',		//42
+	'[',		//43
+	']',		//44
+	';',		//45
+};
+#define LEX_SZDEFTOKEN_TYPE_NUM		9	//Êı¾İÀàĞÍ´ÊËØÊıÄ¿
+#define LEX_SZDEFTOKEN_OTHER_OFFSET	20	//ÆäËûÀàĞÍ´ÊËØÆ«ÒÆ
+const char lex_DefszTokenTab[][SINGLE_TOKEN_MAXLEN]={
+	"unsigned char",	"signed char",	"char",
+	"unsgined int",		"signed int",	"int",
+	"unsigned long",	"signed long",	"long",	//1
+
+	"include",	//20
+	"define",	//21
+	"typedef",	//22
+	"struct",	//23
+	"enum",		//24
+
+};
+
 //´Ê·¨·ÖÎöÔ¤É¨ÃèÊı¾İÁ÷²Ù×÷·½·¨(È¡³ö»òÕß»ØÍË)
 typedef enum{
 	POP = 0,
@@ -39,14 +66,15 @@ char Token[LEX_SCAN_PRESCAN_TOKEN_MAX+1][SINGLE_TOKEN_MAXLEN+1];	//Ò»´Î·ÖÎö×Ü¹²Ò
 
 LEX_GETSTREAM_ERROR GetStream(void)
 {
+	const char teststream[] = "int char[] _fuck";
 	//³õÊ¼»¯Ö¸Õë
 	lex_scan_stream.pScan = 0;
 	//°´ĞĞ¶ÁÈ¡ÎÄ¼ş,¶Ô¶ÁÈ¡µÄÊı¾İ½øĞĞÔ¤´¦Àí
 	
 	//¶ÔÈ«¾Östream½øĞĞ¸³Öµ
-	memcpy(lex_scan_stream.szStream,"fuck i define typedef int uinddddddddddddddsigned ",sizeof("fuck i define typedef int uinsigned +"));
+	memcpy(lex_scan_stream.szStream, teststream, sizeof(teststream));
 	//±£´æ¶ÁÈ¡µÄ×Ö·ûÊı
-	lex_scan_stream.cntLen = sizeof("fuck i define typedef int uinddddddddddddddsigned ");
+	lex_scan_stream.cntLen = sizeof(teststream);
 
 	return LEX_GETSTREAM_SUCCESS;
 }
@@ -100,16 +128,19 @@ static LEX_STREAM_PRESCAN_ERROR lex_pre_scaner(
 		ch=pLexScanStream->szStream[pLexScanStream->pScan++];
 	}while((ch==' ' || ch=='\t') && pLexScanStream->pScan<pLexScanStream->cntLen);
 
-	if(ch == ' ' || ch == '\t' || ch == '\0'){
+	if(ch == ' ' || ch == '\t' || ch == '\0'){		//¶ÔÓ¦ÉÏÊöÈıÖÖÇé¿ö
 		return LEX_PRESCAN_END;			//´¦ÀíÍêÈ«²¿µÄÊı¾İÁ÷
 	}
 	p_szDest[m++]=ch;
 	//´¦Àí×ÖÄ¸»ò'_'´òÍ·µÄ´ÊËØ
     if((ch<='z' && ch>='a')||(ch<='Z' && ch>='A')|| ch=='_'){ 
-      	while(ch!=' ' && ch!='\t' && m<SINGLE_TOKEN_MAXLEN && pLexScanStream->pScan<pLexScanStream->cntLen){
+      	while(Lex_FindTokenTab(&ch,1) == 0 && ch!=' ' && ch!='\t' &&\
+				m<SINGLE_TOKEN_MAXLEN && pLexScanStream->pScan<pLexScanStream->cntLen){
 			ch=pLexScanStream->szStream[pLexScanStream->pScan++];
 			p_szDest[m++]=ch;
 		};
+		pLexScanStream->pScan--;
+		m--;
 
 		if(m >= SINGLE_TOKEN_MAXLEN){
 			return LEX_PRESCAN_OVERFLOW;	//µ¥¸ö´ÊËØ³¤¶È³¬½ç
@@ -118,4 +149,32 @@ static LEX_STREAM_PRESCAN_ERROR lex_pre_scaner(
 		return LEX_PRESCAN_SUCCESS;
      }
 	return LEX_PRESCAN_FAIL;
+}
+
+
+static int Lex_FindTokenTab(char *pSrc, int nLen)
+{
+	int i;
+	if(nLen == 0){
+		return 0;
+
+	}else if(nLen > SINGLE_TOKEN_MAXLEN){
+		return 0;
+
+	}else if(1 == nLen){
+		for(i=0; i<sizeof(lex_DefchTokenTab); i++){
+			if(*pSrc == lex_DefchTokenTab[i]){
+				return (i+LEX_CHDEFTOKEN_OFFSET);
+			}
+		}
+		return 0;	//Î´ÕÒµ½Ä¬ÈÏ×Ö·ûtoken
+
+	}else {
+		for(i=0; i<sizeof(lex_DefszTokenTab)/sizeof(lex_DefszTokenTab[0]); i++){
+			if(memcmp(pSrc, lex_DefszTokenTab[i], nLen) == 0){
+				return i;
+			}
+		}
+		return 0;
+	}
 }

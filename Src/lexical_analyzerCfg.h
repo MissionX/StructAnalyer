@@ -5,19 +5,22 @@
 #define LEX_SCAN_PRESCAN_TOKEN_MAX	1	//词法分析器最多支持预扫描的词素个数
 #define LEX_INPUT_STREAM_MAXLEN		200	//词法分析器一次性输入字符串流最大长度
 
+
 /***************************************************
 词法分析器最终返回的词素Type定义(待补充)
 
 数据类型	1
-include		2
-define		3
-typedef		4
-struct		5
-enum		6
-#			7
-{			8
-}			9
-;			10
+include		20
+define		21
+typedef		22
+struct		23
+enum		24
+#			40
+{			41
+}			42
+[			43
+]			44
+;			45
 **********************************************************/
 typedef struct{
 	int nType;
@@ -36,8 +39,6 @@ typedef enum{
 	lex_DefTypeEnumEnd,
 };
 */
-
-extern const char *lex_DefTokenTab[SINGLE_TOKEN_MAXLEN];
 
 
 
