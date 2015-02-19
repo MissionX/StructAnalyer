@@ -2,7 +2,7 @@
 #define __LEXICAL_ANALYZERCFG_H__
 
 #define SINGLE_TOKEN_MAXLEN			20	//单个语素最大支持长度
-#define LEX_SCAN_PRESCAN_TOKEN_MAX	1	//词法分析器最多支持预扫描的词素个数
+#define LEX_SCAN_PRESCAN_TOKEN_MAX	2	//词法分析器最多支持预扫描的词素个数
 #define LEX_INPUT_STREAM_MAXLEN		200	//词法分析器一次性输入字符串流最大长度
 
 
@@ -24,7 +24,7 @@ enum		24
 **********************************************************/
 typedef struct{
 	int nType;
-	char szString;
+	char szString[SINGLE_TOKEN_MAXLEN];
 }LEX_ANALYZE_RESULT;
 
 

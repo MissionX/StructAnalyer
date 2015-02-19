@@ -68,9 +68,18 @@ const DESTSTRUCT_INFO Test_DestStruct_Info[] =
 	},
 };
 
-int amain(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
-	Print_DestStructInfo((DESTSTRUCT_INFO *)Test_DestStruct_Info);
+	LEX_ANALYZE_RESULT lex_analyze_token;
+	LEX_STREAM_SCAN_ERROR lex_alanyze_rst;
+	lex_analyze_init();
+	lex_alanyze_rst = lex_analyze(&lex_analyze_token);
+	while(lex_alanyze_rst != LEX_SCAN_END){
+		printf("\r\nToken[%d]:\t%s",lex_analyze_token.nType,\
+							lex_analyze_token.szString);
+		lex_alanyze_rst = lex_analyze(&lex_analyze_token);
+	}
+//	Print_DestStructInfo((DESTSTRUCT_INFO *)Test_DestStruct_Info);
 	getchar();
 	return 0;
 }
